@@ -21,25 +21,36 @@
     ]
   },
   {
-    "objectID": "tt/2025-07-08.html",
-    "href": "tt/2025-07-08.html",
-    "title": "TidyTuesday Sample 1",
+    "objectID": "tt/2026-27-01.html",
+    "href": "tt/2026-27-01.html",
+    "title": "2026-27-01: Brazilian Companies",
     "section": "",
-    "text": "Add content here",
+    "text": "Dataset",
     "crumbs": [
       "TidyTuesday",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>TidyTuesday Sample 1</span>"
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>2026-27-01: Brazilian Companies</span>"
     ]
   },
   {
-    "objectID": "tt/2025-07-15.html",
-    "href": "tt/2025-07-15.html",
-    "title": "TidyTuesday Sample 2",
-    "section": "",
-    "text": "Add content here",
+    "objectID": "tt/2026-27-01.html#research-question",
+    "href": "tt/2026-27-01.html#research-question",
+    "title": "2026-27-01: Brazilian Companies",
+    "section": "Research Question",
+    "text": "Research Question\nI approached this tidytuesday through the lens of a potential business innovator, specifically someone who was interested in starting a business in Brazil and wanted to see the most common owner roles. My specific research question was:\n\nWhat are the most common owner roles in Brazilian businesses?",
     "crumbs": [
       "TidyTuesday",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>TidyTuesday Sample 2</span>"
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>2026-27-01: Brazilian Companies</span>"
+    ]
+  },
+  {
+    "objectID": "tt/2026-27-01.html#analysis",
+    "href": "tt/2026-27-01.html#analysis",
+    "title": "2026-27-01: Brazilian Companies",
+    "section": "Analysis",
+    "text": "Analysis\nAlthough this could be visualized with a simple bar plot, I wanted to learn how to make a circle packing plot, where the size of the circle relates to the frequency of the legally-defined business owner roles. I used a package called packcircles to generate the circle packing, which I found though a circle-packing-with-R guide and plotly to make the graph interactive. The latter package is most important given the variation in size from the most to least frequent owner roles, as it allows the user to zoom in to see the least frequent roles while maintaining the visual difference in frequency among owner roles I wanted to show.\n\nCodeoq_freq &lt;- companies %&gt;%\n  select(company_size, owner_qualification) %&gt;%\n  group_by(owner_qualification) %&gt;%\n  summarize(cnt = n()) %&gt;%\n  arrange(desc(cnt))\n\npacking &lt;- circleProgressiveLayout(oq_freq$cnt, sizetype = \"area\")\noq_freq &lt;- cbind(oq_freq, packing)\ndat.gg &lt;- circleLayoutVertices(packing, npoints=50)\n\np &lt;- ggplot() + \n  geom_polygon(\n    data = dat.gg,\n    aes(x, y, group = id, fill = as.factor(id),\n        text = paste(\n          \"Qualification:\", oq_freq$owner_qualification[id],\n          \"&lt;br&gt;Count:\", oq_freq$cnt[id]\n        )),\n    color = \"black\",\n    alpha = 0.6\n  ) +\n  scale_fill_manual(values = viridis(nrow(oq_freq))) +\n  geom_text(\n    data = subset(oq_freq, cnt &gt; quantile(cnt, 0.6)),\n    aes(x, y, label = owner_qualification),\n    size = 3.5\n  ) +\n  theme_void() +\n  theme(legend.position=\"none\") +\n  labs(title=\"Most Common Roles for Brazilian Business Owners\") + \n  coord_equal()\n\nggplotly(p, tooltip = \"text\")",
+    "crumbs": [
+      "TidyTuesday",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>2026-27-01: Brazilian Companies</span>"
     ]
   },
   {
@@ -50,7 +61,7 @@
     "text": "R",
     "crumbs": [
       "Pre-Class Learnings",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Pre-Class Learning Summaries</span>"
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Pre-Class Learning Summaries</span>"
     ]
   },
   {
@@ -61,7 +72,7 @@
     "text": "Quarto\n\n\n\nfrom qmd4sci.njtierney.com",
     "crumbs": [
       "Pre-Class Learnings",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Pre-Class Learning Summaries</span>"
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Pre-Class Learning Summaries</span>"
     ]
   },
   {
@@ -72,7 +83,7 @@
     "text": "Exercise\nCarryout the following steps to clean and save the San Francisco Weather data. Make sure to download and add the data file to your portfolio repository as instructed.\nCodelibrary(tidyverse)\n\nweather &lt;- read.csv(\"./data/raw/weather.csv\")\nweather_clean &lt;- weather %&gt;% \n  mutate(PrecipYr = na_if(PrecipYr, 99999)) %&gt;%\n  mutate(dateInYear = yday(mdy(date))) %&gt;%\n  mutate(month_name = month(mdy(date), label = T))\n\nwrite_csv(weather_clean, \"./data/processed/weather_clean.csv\")",
     "crumbs": [
       "In-Class Activities",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Cleaning SFO Weather Data</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Cleaning SFO Weather Data</span>"
     ]
   },
   {
@@ -83,7 +94,7 @@
     "text": "Read in the weather data in this file with the correct relative file path after you move it to the instructed location.\nThere is a variable that has values that don’t make sense in the data context. Figure out which variable this is and clean it up by making those values missing using na_if().\nCreate a variable called dateInYear that indicates the day of the year (1-365) for each case. (Jan 1 should be 1, and Dec 31 should be 365).\nCreate a variable called month_name that shows the 3-letter abbreviation for each case.\nSave the wrangled data to the data/processed/ folder using write_csv(). Name this file weather_clean.csv. Look up the documentation for this function by typing ?write_csv in the Console. You’ll need to write an appropriate relative path.",
     "crumbs": [
       "In-Class Activities",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Cleaning SFO Weather Data</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Cleaning SFO Weather Data</span>"
     ]
   },
   {
@@ -94,7 +105,7 @@
     "text": "Add content here",
     "crumbs": [
       "Extras",
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Extra Sample 1</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Extra Sample 1</span>"
     ]
   },
   {
@@ -105,7 +116,7 @@
     "text": "Add content here",
     "crumbs": [
       "Extras",
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>Extra Sample 2</span>"
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Extra Sample 2</span>"
     ]
   }
 ]
