@@ -242,6 +242,16 @@ cookieconsent.run({
   <a href="../ica/06-wrangling-1-notes.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">6 Adv Data wrangling I</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ica/07-wrangling-2-notes.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">7 Adv Data wrangling II</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ica/08-missing-data-notes.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">8 Missing Data</span></a>
+  </div>
+</li>
       </ul>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -304,6 +314,7 @@ cookieconsent.run({
 <p>The CNPJ open data is a large-scale public registry of Brazilian legal entities. For this dataset, the raw company records were cleaned and enriched with lookup tables (legal nature, owner qualification, and company size), then filtered to retain firms above a share-capital threshold so the analysis focuses on meaningful variation in capital stock.</p>
 </blockquote>
 <section id="research-question" class="level2"><h2 class="anchored" data-anchor-id="research-question">Research Question</h2>
+<p>Possible questions: What do I need to set my thermostat to in my greenhouse for each plant? And for how long? is the relationship between temperature and life-cycle of an edible plant?</p>
 <blockquote class="blockquote">
 <p><strong>Research question here</strong></p>
 </blockquote>
@@ -335,6 +346,25 @@ cookieconsent.run({
 #   temperature_growing &lt;chr&gt;, days_germination &lt;chr&gt;, days_harvest &lt;chr&gt;,
 #   nutritional_info &lt;chr&gt;, energy &lt;dbl&gt;, sensitivities &lt;chr&gt;,
 #   description &lt;chr&gt;, requirements &lt;chr&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>edible_plants <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(temperature_germination) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(days_germination)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">mutate</span>(<span class="at">temperature_germination =</span> <span class="fu">as.numeric</span>(temperature_germination)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb4-5"><a href="#cb4-5"></a>  <span class="fu">geom_segment</span>(</span>
+<span id="cb4-6"><a href="#cb4-6"></a>    <span class="fu">aes</span>(</span>
+<span id="cb4-7"><a href="#cb4-7"></a>      <span class="at">y =</span> <span class="fu">as.numeric</span>(temperature_germination),</span>
+<span id="cb4-8"><a href="#cb4-8"></a>      <span class="at">x =</span> <span class="dv">0</span>,</span>
+<span id="cb4-9"><a href="#cb4-9"></a>      <span class="at">xend =</span> <span class="fu">as.numeric</span>(days_germination)</span>
+<span id="cb4-10"><a href="#cb4-10"></a>    )</span>
+<span id="cb4-11"><a href="#cb4-11"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="2026-02-03_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 
@@ -968,36 +998,54 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb4" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">---</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="an">title:</span><span class="co"> "2026-02-03: Edible Plants Database"</span></span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="an">format:</span><span class="co"> html</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a><span class="co">---</span></span>
-<span id="cb4-5"><a href="#cb4-5"></a></span>
-<span id="cb4-6"><a href="#cb4-6"></a></span>
-<span id="cb4-7"><a href="#cb4-7"></a><span class="fu"># Dataset</span></span>
-<span id="cb4-8"><a href="#cb4-8"></a><span class="at">&gt; **Taken from [tidytuesday](https://github.com/rfordatascience/tidytuesday/blob/main/data/2026/2026-01-27/readme.md)**: This week we’re exploring Brazilian Companies, curated from Brazil’s open CNPJ (Cadastro Nacional da Pessoa Jurídica) records published by the Brazilian Ministry of Finance / Receita Federal on the national open-data portal (dados.gov.br).</span></span>
-<span id="cb4-9"><a href="#cb4-9"></a><span class="at">&gt;</span></span>
-<span id="cb4-10"><a href="#cb4-10"></a><span class="at">&gt; The CNPJ open data is a large-scale public registry of Brazilian legal entities. For this dataset, the raw company records were cleaned and enriched with lookup tables (legal nature, owner qualification, and company size), then filtered to retain firms above a share-capital threshold so the analysis focuses on meaningful variation in capital stock.</span></span>
-<span id="cb4-11"><a href="#cb4-11"></a></span>
-<span id="cb4-12"><a href="#cb4-12"></a></span>
-<span id="cb4-13"><a href="#cb4-13"></a></span>
-<span id="cb4-14"><a href="#cb4-14"></a><span class="fu">## Research Question</span></span>
-<span id="cb4-15"><a href="#cb4-15"></a></span>
-<span id="cb4-16"><a href="#cb4-16"></a></span>
-<span id="cb4-17"><a href="#cb4-17"></a><span class="at">&gt; **Research question here**</span></span>
-<span id="cb4-18"><a href="#cb4-18"></a></span>
-<span id="cb4-19"><a href="#cb4-19"></a><span class="fu">## Analysis</span></span>
-<span id="cb4-20"><a href="#cb4-20"></a></span>
-<span id="cb4-23"><a href="#cb4-23"></a><span class="in">```{r}</span></span>
-<span id="cb4-24"><a href="#cb4-24"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb4-25"><a href="#cb4-25"></a>edible_plants <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">'https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2026/2026-02-03/edible_plants.csv'</span>)</span>
-<span id="cb4-26"><a href="#cb4-26"></a><span class="in">```</span></span>
-<span id="cb4-27"><a href="#cb4-27"></a> </span>
-<span id="cb4-28"><a href="#cb4-28"></a></span>
-<span id="cb4-31"><a href="#cb4-31"></a><span class="in">```{r}</span></span>
-<span id="cb4-32"><a href="#cb4-32"></a>edible_plants</span>
-<span id="cb4-33"><a href="#cb4-33"></a><span class="in">```</span></span>
-<span id="cb4-34"><a href="#cb4-34"></a></span>
+<div class="sourceCode" id="cb5" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">---</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="an">title:</span><span class="co"> "2026-02-03: Edible Plants Database"</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="an">format:</span><span class="co"> html</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="co">---</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a></span>
+<span id="cb5-6"><a href="#cb5-6"></a></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="fu"># Dataset</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="at">&gt; **Taken from [tidytuesday](https://github.com/rfordatascience/tidytuesday/blob/main/data/2026/2026-01-27/readme.md)**: This week we’re exploring Brazilian Companies, curated from Brazil’s open CNPJ (Cadastro Nacional da Pessoa Jurídica) records published by the Brazilian Ministry of Finance / Receita Federal on the national open-data portal (dados.gov.br).</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="at">&gt;</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a><span class="at">&gt; The CNPJ open data is a large-scale public registry of Brazilian legal entities. For this dataset, the raw company records were cleaned and enriched with lookup tables (legal nature, owner qualification, and company size), then filtered to retain firms above a share-capital threshold so the analysis focuses on meaningful variation in capital stock.</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a></span>
+<span id="cb5-12"><a href="#cb5-12"></a></span>
+<span id="cb5-13"><a href="#cb5-13"></a></span>
+<span id="cb5-14"><a href="#cb5-14"></a><span class="fu">## Research Question</span></span>
+<span id="cb5-15"><a href="#cb5-15"></a></span>
+<span id="cb5-16"><a href="#cb5-16"></a>Possible questions: What do I need to set my thermostat to in my greenhouse for each plant? And for how long? is the relationship between temperature and life-cycle of an edible plant?</span>
+<span id="cb5-17"><a href="#cb5-17"></a></span>
+<span id="cb5-18"><a href="#cb5-18"></a><span class="at">&gt; **Research question here**</span></span>
+<span id="cb5-19"><a href="#cb5-19"></a></span>
+<span id="cb5-20"><a href="#cb5-20"></a><span class="fu">## Analysis</span></span>
+<span id="cb5-21"><a href="#cb5-21"></a></span>
+<span id="cb5-24"><a href="#cb5-24"></a><span class="in">```{r}</span></span>
+<span id="cb5-25"><a href="#cb5-25"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb5-26"><a href="#cb5-26"></a>edible_plants <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">'https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2026/2026-02-03/edible_plants.csv'</span>)</span>
+<span id="cb5-27"><a href="#cb5-27"></a><span class="in">```</span></span>
+<span id="cb5-28"><a href="#cb5-28"></a> </span>
+<span id="cb5-29"><a href="#cb5-29"></a></span>
+<span id="cb5-30"><a href="#cb5-30"></a></span>
+<span id="cb5-31"><a href="#cb5-31"></a></span>
+<span id="cb5-34"><a href="#cb5-34"></a><span class="in">```{r}</span></span>
+<span id="cb5-35"><a href="#cb5-35"></a>edible_plants</span>
+<span id="cb5-36"><a href="#cb5-36"></a><span class="in">```</span></span>
+<span id="cb5-37"><a href="#cb5-37"></a></span>
+<span id="cb5-40"><a href="#cb5-40"></a><span class="in">```{r}</span></span>
+<span id="cb5-41"><a href="#cb5-41"></a>edible_plants <span class="sc">%&gt;%</span></span>
+<span id="cb5-42"><a href="#cb5-42"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(temperature_germination) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(days_germination)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-43"><a href="#cb5-43"></a>  <span class="fu">mutate</span>(<span class="at">temperature_germination =</span> <span class="fu">as.numeric</span>(temperature_germination)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-44"><a href="#cb5-44"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb5-45"><a href="#cb5-45"></a>  <span class="fu">geom_segment</span>(</span>
+<span id="cb5-46"><a href="#cb5-46"></a>    <span class="fu">aes</span>(</span>
+<span id="cb5-47"><a href="#cb5-47"></a>      <span class="at">y =</span> <span class="fu">as.numeric</span>(temperature_germination),</span>
+<span id="cb5-48"><a href="#cb5-48"></a>      <span class="at">x =</span> <span class="dv">0</span>,</span>
+<span id="cb5-49"><a href="#cb5-49"></a>      <span class="at">xend =</span> <span class="fu">as.numeric</span>(days_germination)</span>
+<span id="cb5-50"><a href="#cb5-50"></a>    )</span>
+<span id="cb5-51"><a href="#cb5-51"></a>  )</span>
+<span id="cb5-52"><a href="#cb5-52"></a>  </span>
+<span id="cb5-53"><a href="#cb5-53"></a><span class="in">```</span></span>
+<span id="cb5-54"><a href="#cb5-54"></a></span>
 </code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
