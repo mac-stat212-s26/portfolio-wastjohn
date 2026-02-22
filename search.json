@@ -696,7 +696,7 @@
     "href": "ica/08-missing-data-notes.html#exercises",
     "title": "8 Missing Data",
     "section": "Exercises",
-    "text": "Exercises\n\n\nMechanism detection practice Look at the boxplot + scatterplot pairs for Alternate Situations 1 and 2 below. How do these situations compare to our actual situation and to each other? What concerns might arise from using a model to impute Ozone?\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe missing values are not evenly distributed along the Solar.R values in either case. Additionally, Mod1 has existing values where the missing values are, so we could extrapolate, but that is not the case for Mod2.\n\n\n\nOzone mechanism detection Continue the investigation of missingness for Ozone.\n\nWe want to see how Month, Wind, and Temp relate to the chance of missingness for Ozone and to the value of Ozone.\nDoes it look like a linear regression model (perhaps with variable transformations) could be effective in imputing the missing ozone data?\n\nCode# month\nairquality %&gt;%\n  ggplot(aes(y = Month, x = is.na(Ozone))) + \n  geom_boxplot()  \n\n\n\n\n\n\nCodeairquality %&gt;%\n  ggplot(aes(x = Month, color = is.na(Ozone))) + \n  geom_density() # most of the missing points in ozone are in month 6\n\n\n\n\n\n\nCode# wind\nairquality %&gt;%\n  ggplot(aes(y = Wind, x = is.na(Ozone))) + \n  geom_boxplot()  \n\n\n\n\n\n\nCodeairquality %&gt;%\n  ggplot(aes(x = Wind, color = is.na(Ozone))) + \n  geom_density() # missing and non-missing are very similar\n\n\n\n\n\n\nCode# temp\nairquality %&gt;%\n  ggplot(aes(y = Temp, x = is.na(Ozone))) + \n  geom_boxplot()  \n\n\n\n\n\n\nCodeairquality %&gt;%\n  ggplot(aes(x = Temp, color = is.na(Ozone))) + \n  geom_density() # missing and non-missing are very similar\n\n\n\n\n\n\nCodeairquality %&gt;%\n  ggplot(aes(x = Month, y = Ozone)) + \n  geom_point() + \n  geom_smooth()",
+    "text": "Exercises\n\n\nMechanism detection practice Look at the boxplot + scatterplot pairs for Alternate Situations 1 and 2 below. How do these situations compare to our actual situation and to each other? What concerns might arise from using a model to impute Ozone?\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe missing values are not evenly distributed along the Solar.R values in either case. Additionally, Mod1 has existing values where the missing values are, so we could extrapolate, but that is not the case for Mod2.\n\n\n\nOzone mechanism detection Continue the investigation of missingness for Ozone.\n\nWe want to see how Month, Wind, and Temp relate to the chance of missingness for Ozone and to the value of Ozone.\nDoes it look like a linear regression model (perhaps with variable transformations) could be effective in imputing the missing ozone data?\n\nCode# month\nairquality %&gt;%\n  ggplot(aes(y = Month, x = is.na(Ozone))) + \n  geom_boxplot()  \n\n\n\n\n\n\nCodeairquality %&gt;%\n  ggplot(aes(x = Month, color = is.na(Ozone))) + \n  geom_density() # most of the missing points in ozone are in month 6\n\n\n\n\n\n\nCode# wind\nairquality %&gt;%\n  ggplot(aes(y = Wind, x = is.na(Ozone))) + \n  geom_boxplot()  \n\n\n\n\n\n\nCodeairquality %&gt;%\n  ggplot(aes(x = Wind, color = is.na(Ozone))) + \n  geom_density() # missing and non-missing are very similar\n\n\n\n\n\n\nCode# temp\nairquality %&gt;%\n  ggplot(aes(y = Temp, x = is.na(Ozone))) + \n  geom_boxplot()  \n\n\n\n\n\n\nCodeairquality %&gt;%\n  ggplot(aes(x = Temp, color = is.na(Ozone))) + \n  geom_density() # missing and non-missing are very similar\n\n\n\n\n\n\nCodeairquality %&gt;%\n  ggplot(aes(x = Month, y = Ozone)) + \n  geom_point() + \n  geom_smooth()\n\n\n\n\n\n\n\n\nI think we could use month as a predictor for imputating the missing values",
     "crumbs": [
       "In-Class Activities",
       "<span class='chapter-number'>11</span>  <span class='chapter-title'>8 Missing Data</span>"
@@ -718,7 +718,7 @@
     "href": "ica/08-missing-data-notes.html#simulation-studies",
     "title": "8 Missing Data",
     "section": "Simulation Studies",
-    "text": "Simulation Studies\nWe can use a simulation study to investigate the statistical properties described above.\n\n\nGenerate (simulate) data where we are in control of missing data mechanisms and the true relationship between an outcome and the predictors.\nOn that simulated data, use single imputation to fill in the missing values. Fit the desired model, and obtain a confidence interval for a coefficient of interest.\nOn that simulated data, use multiple imputation to fill in the missing values. Fit the desired models on all imputed datasets, pool results, and obtain a confidence interval for a coefficient of interest.\nSteps 1 - 3 are repeated a lot of times (num_simulations &lt;- 1000) to see how things work out in lots of different samples.\nSummarize the performance of single and multiple imputation across the num_simulations simulations.\n\n\nWe will slowly step through the simulation study code below. We will pause frequently for you to add comments documenting what is happening.\n\nCodeset.seed(224)\nnum_simulations &lt;- 1000\nci_list &lt;- vector(\"list\", length = num_simulations)\n\nsystem.time({\nfor (i in 1:num_simulations) {\n    # Simulate data\n    n &lt;- 1000\n    sim_data &lt;- tibble(\n        x1 = runif(n, min = 0, max = 1),\n        x2 = x1 + rnorm(n, mean = 0, sd = 1),\n        x2_miss_bool = rbinom(n, size = 1, prob = x1/2),\n        x2_NA = if_else(x2_miss_bool == 1, NA, x2),\n        y = x1 + x2 + rnorm(n, mean = 0, sd = 1)\n    )\n    \n    # Single imputation ---------------\n    mice_obj &lt;- mice(sim_data |&gt; select(x1, x2_NA, y), m = 1, method = \"norm\", printFlag = FALSE)\n    si_mod &lt;- with(mice_obj, lm(y ~ x1 + x2_NA))\n    ci_single &lt;- si_mod$analyses[[1]] |&gt; confint(level = 0.95)\n    ci_single &lt;- ci_single[\"x2_NA\",]\n    \n    # Multiple imputation -------------\n    mice_obj &lt;- mice(sim_data |&gt; select(x1, x2_NA, y), m = 10, method = \"norm\", printFlag = FALSE)\n    mi_mods &lt;- with(mice_obj, lm(y ~ x1 + x2_NA))\n    pooled_res &lt;- pool(mi_mods)\n    summ_pooled_res &lt;- summary(pooled_res, conf.int = TRUE, conf.level = 0.95)\n    ci_multiple_lower &lt;- summ_pooled_res |&gt; filter(term==\"x2_NA\") |&gt; pull(`2.5 %`)\n    ci_multiple_upper &lt;- summ_pooled_res |&gt; filter(term==\"x2_NA\") |&gt; pull(`97.5 %`)\n    \n    # Store CI information\n    ci_list[[i]] &lt;- tibble(\n        ci_lower = c(\n            ci_single[1],\n            ci_multiple_lower\n        ),\n        ci_upper = c(\n            ci_single[2],\n            ci_multiple_upper\n        ),\n        which_imp = c(\"single\", \"multiple\")\n    )\n}\n})\n\n   user  system elapsed \n140.716   0.079 141.082 \n\n\nBelow we compute the confidence interval (CI) coverage probability (fraction of times the CI contains the true value of 1) for the CIs generated from single and multiple imputation:\n\nCodeci_data &lt;- bind_rows(ci_list)\nci_data |&gt; \n    mutate(contains_truth = ci_lower &lt; 1 & ci_upper &gt; 1) |&gt; \n    group_by(which_imp) |&gt; \n    summarize(frac_contains_truth = mean(contains_truth))\n\n# A tibble: 2 × 2\n  which_imp frac_contains_truth\n  &lt;chr&gt;                   &lt;dbl&gt;\n1 multiple                0.947\n2 single                  0.902",
+    "text": "Simulation Studies\nWe can use a simulation study to investigate the statistical properties described above.\n\n\nGenerate (simulate) data where we are in control of missing data mechanisms and the true relationship between an outcome and the predictors.\nOn that simulated data, use single imputation to fill in the missing values. Fit the desired model, and obtain a confidence interval for a coefficient of interest.\nOn that simulated data, use multiple imputation to fill in the missing values. Fit the desired models on all imputed datasets, pool results, and obtain a confidence interval for a coefficient of interest.\nSteps 1 - 3 are repeated a lot of times (num_simulations &lt;- 1000) to see how things work out in lots of different samples.\nSummarize the performance of single and multiple imputation across the num_simulations simulations.\n\n\nWe will slowly step through the simulation study code below. We will pause frequently for you to add comments documenting what is happening.\n\nCodeset.seed(224)\nnum_simulations &lt;- 1000\nci_list &lt;- vector(\"list\", length = num_simulations)\n\nsystem.time({\nfor (i in 1:num_simulations) {\n    # Simulate data\n    n &lt;- 1000\n    sim_data &lt;- tibble(\n        x1 = runif(n, min = 0, max = 1),\n        x2 = x1 + rnorm(n, mean = 0, sd = 1),\n        x2_miss_bool = rbinom(n, size = 1, prob = x1/2),\n        x2_NA = if_else(x2_miss_bool == 1, NA, x2),\n        y = x1 + x2 + rnorm(n, mean = 0, sd = 1)\n    )\n    \n    # Single imputation ---------------\n    mice_obj &lt;- mice(sim_data |&gt; select(x1, x2_NA, y), m = 1, method = \"norm\", printFlag = FALSE)\n    si_mod &lt;- with(mice_obj, lm(y ~ x1 + x2_NA))\n    ci_single &lt;- si_mod$analyses[[1]] |&gt; confint(level = 0.95)\n    ci_single &lt;- ci_single[\"x2_NA\",]\n    \n    # Multiple imputation -------------\n    mice_obj &lt;- mice(sim_data |&gt; select(x1, x2_NA, y), m = 10, method = \"norm\", printFlag = FALSE)\n    mi_mods &lt;- with(mice_obj, lm(y ~ x1 + x2_NA))\n    pooled_res &lt;- pool(mi_mods)\n    summ_pooled_res &lt;- summary(pooled_res, conf.int = TRUE, conf.level = 0.95)\n    ci_multiple_lower &lt;- summ_pooled_res |&gt; filter(term==\"x2_NA\") |&gt; pull(`2.5 %`)\n    ci_multiple_upper &lt;- summ_pooled_res |&gt; filter(term==\"x2_NA\") |&gt; pull(`97.5 %`)\n    \n    # Store CI information\n    ci_list[[i]] &lt;- tibble(\n        ci_lower = c(\n            ci_single[1],\n            ci_multiple_lower\n        ),\n        ci_upper = c(\n            ci_single[2],\n            ci_multiple_upper\n        ),\n        which_imp = c(\"single\", \"multiple\")\n    )\n}\n})\n\n   user  system elapsed \n143.188   0.159 143.527 \n\n\nBelow we compute the confidence interval (CI) coverage probability (fraction of times the CI contains the true value of 1) for the CIs generated from single and multiple imputation:\n\nCodeci_data &lt;- bind_rows(ci_list)\nci_data |&gt; \n    mutate(contains_truth = ci_lower &lt; 1 & ci_upper &gt; 1) |&gt; \n    group_by(which_imp) |&gt; \n    summarize(frac_contains_truth = mean(contains_truth))\n\n# A tibble: 2 × 2\n  which_imp frac_contains_truth\n  &lt;chr&gt;                   &lt;dbl&gt;\n1 multiple                0.947\n2 single                  0.902",
     "crumbs": [
       "In-Class Activities",
       "<span class='chapter-number'>11</span>  <span class='chapter-title'>8 Missing Data</span>"
@@ -738,12 +738,133 @@
   {
     "objectID": "extra/extra-sample1.html",
     "href": "extra/extra-sample1.html",
-    "title": "Extra Sample 1",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
     "section": "",
-    "text": "Add content here",
+    "text": "Advanced Data Vis\nggplot2 is designed to help us make efficient and effective plots by utilizing a standard convention of plot-making called the grammar of graphics. What follows is an overview of the standard terminology and examples.",
     "crumbs": [
       "Extras",
-      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Extra Sample 1</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
+    ]
+  },
+  {
+    "objectID": "extra/extra-sample1.html#data",
+    "href": "extra/extra-sample1.html#data",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
+    "section": "Data",
+    "text": "Data\nPart of creating a standard convention for plots is having a standard convection for data. This tidy data mimics that of a spreadsheet or matrix, wherein rows correspond to observations and columns correspond to variables, and the intersection of a row and a column is a value (i.e., it’s tabular). R calls these data frames tibbles.\nTo start a data-exploration project in R, you really only need 2 things to start.\n\nlibrary(tidyverse)\ndata &lt;- read.csv(\"path/to/data.csv\")\n\nYou can explore your data with the following commands. Note the %&gt;% symbol corresponds to the pipe operator in tidyverse, which allows you to pass the object before the pipe into the function after the pipe.\n\ndata %&gt;% head()  # see the first few rows\n\ndata %&gt;% tail()  # see the last few rows\n\ndata %&gt;% nrow()  # get the number of rows\n\ndata %&gt;% ncol()  # get the number of columns\n\ndata %&gt;% dim()  # get the dimensions of the data frame (rows x columns)\n\ndata %&gt;% View()  # open the dataset in your editor (RStudio, Positron, or VSCode)\n\nYou can also manipulate (under good intentions) the data by filtering, selecting, mutating, grouping, or summarizing. Thankfully, tidyverse has some aptly named functions for just that.\n\ndata %&gt;%\n  filter(variable &gt; value & ... | ...)\n  \ndata %&gt;%\n  select(variable1, variable2, ...)\n  \ndata %&gt;%\n  mutate(newvariable1 = ___, newvariable2 = ___, ...)\n  \ndata %&gt;%\n  group_by(variable1, variable2, ...) %&gt;%\n  summarize(summaryvariable = ___, ...)",
+    "crumbs": [
+      "Extras",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
+    ]
+  },
+  {
+    "objectID": "extra/extra-sample1.html#ggplot",
+    "href": "extra/extra-sample1.html#ggplot",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
+    "section": "ggplot",
+    "text": "ggplot\nAfter loading your data, the next step is to prep your canvas for plotting. This is done with\n\ndata %&gt;%\n  ggplot()\n\nInside the parentheses, we can pass our aesthetic mapping, aes(), which is how we can map various aesthetics (like x, y, color, fill, shape, size, etc) to the variables in our data.\n\ndata %&gt;%\n  ggplot(aes(x = ___, y = ___, color = ___, ...))\n\nNote that when you do this, the mappings are passed to every layer you make afterwards, which is not always what you have in mind.",
+    "crumbs": [
+      "Extras",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
+    ]
+  },
+  {
+    "objectID": "extra/extra-sample1.html#geom_",
+    "href": "extra/extra-sample1.html#geom_",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
+    "section": "geom_*",
+    "text": "geom_*\nSpeaking of layers, there are NUMEROUS geom layers you can add to your plots. Below is a list of some of the most common.\n\ndata %&gt;%\n  ggplot(aes(x = ___, y = ___, color = ___, ...)) + \n  geom_point() +   # makes a scatter plot\n  geom_smooth()  # adds a trendline to the data with uncertainty\n\n  \ndata %&gt;%\n  ggplot(aes(x = ___, color = ___, ...)) + \n  geom_boxplot()  # makes a boxplot\n  \ndata %&gt;%\n  ggplot(aes(x = ___, color = ___, ...)) + \n  geom_density()  # makes a density plot\n  \ndata %&gt;%\n  ggplot(aes(x = ___, color = ___, ...)) + \n  geom_histogram() # makes a histogram \n  \n...\n\nAs mentioned before, the main thing you need to remember is that the mappings will be taken from the aes() arguments in the ggplot() call unless directly passed into the geom_* function. In otherwords,\n\ndata %&gt;%\n  ggplot(aes(x = x1, y = x2, color = ___, ...)) + \n  geom_point() +   # makes a scatter plot of x2 vs x1\n  geom_point()  # makes a scatter plot of x2 vs x1\n  \ndata %&gt;%\n  ggplot() + \n  geom_point(aes(x = x1, y = x2, color = ___, ...) +   # makes a scatter plot of x2 vs x1\n  geom_point(aes(x = x1, y = x3, color = ___, ...)  # makes a scatter plot of x3 vs x1\n\nKey takeaway is that sometimes it’s better to pass the mappings at the geom_* layer versus the ggplot() layer.",
+    "crumbs": [
+      "Extras",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
+    ]
+  },
+  {
+    "objectID": "extra/extra-sample1.html#scaling",
+    "href": "extra/extra-sample1.html#scaling",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
+    "section": "scaling",
+    "text": "scaling\nOften times, you’ll want to zoom in on a specific region of the plot, or make a log-log plot. This can be done easily with\n\ndata %&gt;%\n  ggplot(aes(x = x1, y = x2, color = ___, ...)) + \n  geom_point() + \n  scale_x_continuous(limits = c(xlow, xhigh))\n  \ndata %&gt;%\n  ggplot(aes(x = x1, y = x2, color = ___, ...)) + \n  geom_point() + \n  scale_x_log10()",
+    "crumbs": [
+      "Extras",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
+    ]
+  },
+  {
+    "objectID": "extra/extra-sample1.html#labs",
+    "href": "extra/extra-sample1.html#labs",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
+    "section": "labs()",
+    "text": "labs()\nYou can add to your plot by giving it a title, subtitle, caption, and x and y labels. All of this can be done inside the labs() function.\n\ndata %&gt;%\n  ggplot(aes(x = x1, y = x2, color = ___, ...)) + \n  geom_point() +\n  labs(\n    title = \"___\",\n    subtitle = \"___\",\n    caption = \"___\",\n    x = \"___\",\n    y = \"___\"\n  )",
+    "crumbs": [
+      "Extras",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
+    ]
+  },
+  {
+    "objectID": "extra/extra-sample1.html#theme",
+    "href": "extra/extra-sample1.html#theme",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
+    "section": "theme()",
+    "text": "theme()\nThe real advanced part of data visualization comes with the theme, which allows you to change the style of various elements of your plot. There is a lot in this function, but the main takeaways are\n\npreface the theme() call with another theme to minimize your work. theme_classic() removes the background from the plot and is, as the name suggests, a classic theme used in advanced visualizations.\nAll of the arguments you can call in theme() are listed hierarchically. In other words, the x-axis title can be found by editing the argument axis.title.x.\n\n\ndata %&gt;%\n  ggplot(aes(x = x1, y = x2, color = ___, ...)) + \n  geom_point() +\n  labs(\n    title = \"___\",\n    subtitle = \"___\",\n    caption = \"___\",\n    x = \"___\",\n    y = \"___\"\n  ) + \n  theme_classic() + \n  theme()",
+    "crumbs": [
+      "Extras",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
+    ]
+  },
+  {
+    "objectID": "extra/extra-sample1.html#saving-a-plot",
+    "href": "extra/extra-sample1.html#saving-a-plot",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
+    "section": "Saving a plot",
+    "text": "Saving a plot\nOnce your ready to show your plot, it’s done in one move.\n\nggsave(\"name-of-plot.png\")  # saves the most recent plot",
+    "crumbs": [
+      "Extras",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
+    ]
+  },
+  {
+    "objectID": "extra/extra-sample1.html#final-tips",
+    "href": "extra/extra-sample1.html#final-tips",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
+    "section": "Final Tips",
+    "text": "Final Tips\nAs you continue to explore and create visualizations, remember\n\ndocumentation is our friend, and\nyou can always look up the function with a preceding ? in the console.",
+    "crumbs": [
+      "Extras",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
+    ]
+  },
+  {
+    "objectID": "extra/extra-sample1.html#what-is-a-crs-and-why-do-we-care",
+    "href": "extra/extra-sample1.html#what-is-a-crs-and-why-do-we-care",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
+    "section": "What is a CRS and why do we care?",
+    "text": "What is a CRS and why do we care?\nWe know the Earth is a sphere. Except that it’s not… it’s an oblate spheroid, or ellipsoid. Except that it’s not… it’s a bit more of a lumpy potato…\nOkay, so we can’t accurately describe the shape of the Earth as one simple shape. How can we make spatial plots then?\nThe answer is we approximate the Earth to be an ellipsoid, then choose our best part of the approximation, called the datum, to line up with our region of interest. This location-dependent approximation is more generally called a coordinate references system, or CRS for short.\nFor example, NAD83 is the name of a CRS that has a datum centered on North America. SIRGAS20000 is the name of a CRS that has a datum centered on South America.\nBut why would we care if we’re using the NAD83 vs the SIRGAS20000 datum?\nIn reality, it’s only an issue when you are combining data from multiple spatial data sets. Unfortunately, combining data from multiple spatial data sets happens all the time!\nWhen we make our spatial plots, we make map projections. If the map projections are centered on different regions, we get distortions that can cause our overlaying of data to be inconsistent when in reality, they are the same! In other words, the coordinates of the Empire State Building in a NYC centered datum vs a Sydney, Australia centered datum could cause what should be two identical points to be off by a large distance. If we can’t trust our data, then we can’t share it with the world.",
+    "crumbs": [
+      "Extras",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
+    ]
+  },
+  {
+    "objectID": "extra/extra-sample1.html#what-types-of-spatial-filedata-types-exist-in-r",
+    "href": "extra/extra-sample1.html#what-types-of-spatial-filedata-types-exist-in-r",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
+    "section": "What types of spatial file/data types exist in R",
+    "text": "What types of spatial file/data types exist in R\nThere are two main data types for spatial data in R:\n\nVector\n\n\n\nPoints: locations defined by (x, y) coordinates\n\ne.g. cities\n\n\n\nLines: a set of ordered points connected by straight lines\n\ne.g. roads, rivers\n\n\n\nPolygons: same as lines, but first and last points are the same\n\ne.g. geopolitical boundaries, bodies of water\n\n\nFile formats: text files (e.g. .csv, NOTE: don’t store CRS), Shapefiles (.shp), GeoJSON (.geojson), KML (.kml)\n\n\nRaster: like pixel grids\n\n\nContinuous grid of (generally) square cells where each cell has a single value. Cells could be regular, rotated, sheared, rectilinear, or curvilinear. Can also have a resolution elements (i.e. fine vs coarse raster) which are directly related to computation time.\nFile formats: GeoTIFF (.tif or .tiff), NetCDF (.nc), HDF (.hdf)",
+    "crumbs": [
+      "Extras",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
+    ]
+  },
+  {
+    "objectID": "extra/extra-sample1.html#how-can-we-use-r-to-plot-spatial-data",
+    "href": "extra/extra-sample1.html#how-can-we-use-r-to-plot-spatial-data",
+    "title": "Exam 1: Review of Adv Data & Spatial Vis",
+    "section": "How can we use R to plot spatial data?",
+    "text": "How can we use R to plot spatial data?\nWe can treat spatial data like every other type of data. All we need is the tidyverse and sf library.\n\nlibrary(tidyverse)\nlibrary(sf)\n\nFrom there, simply read in the spatial data into a tidy format.\n\ndata.spatial1 &lt;- st_read('location/of/spatial/file1.shp')\ndata.spatial2 &lt;- st_read('location/of/spatial/file2.shp')\n...\n\nThe key thing to remember is that WE MUST PLOT THESE WITH THE SAME CRS FOR OUR RESULTS TO BE ACCURATE.\nYou can check the CRS with\n\nst_crs(data.spatial1)\n\nand you can transform one CRS to another using\n\ndata.spatial2 &lt;- data.spatial2 %&gt;% st_transform(crs = st_crs(data.spatial1))\n\nFrom there, we can plot just like any other geom_* object! We just need to specify with the geom_sf layer.\n\nggplot() + \n  geom_sf(\n    data = data.spatial1,  # ex: spatial map of counties\n    mapping = aes(fill = population)\n  )  # plot counties filled by population\n  geom_sf(\n    data = data.spatial2,  # ex: spatial map of cites\n    mapping = aes(x = x, y = y)\n  )  # plot cities in the counties\n\nFrom there, you can zoom, edit themes, and do everything else you normally can do with a ggplot object!",
+    "crumbs": [
+      "Extras",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Exam 1: Review of Adv Data & Spatial Vis</span>"
     ]
   },
   {
