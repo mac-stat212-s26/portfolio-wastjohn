@@ -1,0 +1,102 @@
+---
+title: "2026-01-27: Brazilian Companies"
+format: html
+---
+
+# Dataset
+> **Taken from [tidytuesday](https://github.com/rfordatascience/tidytuesday/blob/main/data/2026/2026-01-27/readme.md)**: This week we’re exploring Brazilian Companies, curated from Brazil’s open CNPJ (Cadastro Nacional da Pessoa Jurídica) records published by the Brazilian Ministry of Finance / Receita Federal on the national open-data portal (dados.gov.br).
+>
+> The CNPJ open data is a large-scale public registry of Brazilian legal entities. For this dataset, the raw company records were cleaned and enriched with lookup tables (legal nature, owner qualification, and company size), then filtered to retain firms above a share-capital threshold so the analysis focuses on meaningful variation in capital stock.
+
+
+
+## Research Question
+
+I approached this `tidytuesday` through the lens of a potential business innovator, specifically someone who was interested in starting a business in Brazil and wanted to see the most common owner roles. My specific research question was:
+
+> **What are the most common owner roles in Brazilian businesses?**
+
+## Analysis
+
+Although this could be visualized with a simple bar plot, I wanted to learn how to make a circle packing plot, where the size of the circle relates to the frequency of the legally-defined business owner roles. I used a package called `packcircles` to generate the circle packing, which I found though a [circle-packing-with-R guide](https://r-graph-gallery.com/305-basic-circle-packing-with-one-level.html) and `plotly` to make the graph interactive. The latter package is most important given the variation in size from the most to least frequent owner roles, as it allows the user to zoom in to see the least frequent roles while maintaining the visual difference in frequency among owner roles I wanted to show. 
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(packcircles)
+library(viridis)
+library(plotly)
+
+companies <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2026/2026-01-27/companies.csv')
+
+```
+
+```{r}
+oq_freq <- companies %>%
+  select(company_size, owner_qualification) %>%
+  group_by(owner_qualification) %>%
+  summarize(cnt = n()) %>%
+  arrange(desc(cnt))
+
+packing <- circleProgressiveLayout(oq_freq$cnt, sizetype = "area")
+oq_freq <- cbind(oq_freq, packing)
+dat.gg <- circleLayoutVertices(packing, npoints=50)
+
+p <- ggplot() + 
+  geom_polygon(
+    data = dat.gg,
+    aes(x, y, group = id, fill = as.factor(id),
+        text = paste(
+          "Qualification:", oq_freq$owner_qualification[id],
+          "<br>Count:", oq_freq$cnt[id]
+        )),
+    color = "black",
+    alpha = 0.6
+  ) +
+  scale_fill_manual(values = viridis(nrow(oq_freq))) +
+  geom_text(
+    data = subset(oq_freq, cnt > quantile(cnt, 0.6)),
+    aes(x, y, label = owner_qualification),
+    size = 3.5
+  ) +
+  theme_void() +
+  theme(legend.position="none") +
+  labs(title="Most Common Roles for Brazilian Business Owners", subtitle="asdf", caption="asdf") + 
+  coord_equal()
+
+ggplotly(p, tooltip = "text")
+```
+
+```{r, fig.width = 6, fig.height=6}
+# updated figure after comments
+ggplot() + 
+  geom_polygon(
+    data = dat.gg,
+    aes(x, y, group = id,
+        text = paste(
+          "Qualification:", oq_freq$owner_qualification[id],
+          "<br>Count:", oq_freq$cnt[id]
+        )),
+    color = "black",
+    alpha = 0.6
+  ) +
+  geom_text(
+    data = subset(oq_freq, cnt > quantile(cnt, 0.6)),
+    aes(x, y, label = owner_qualification),
+    size = 3.5
+  ) +
+  theme_classic() +
+  theme(
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_blank()
+    ) +
+  labs(title="Most Common Roles for Brazilian Business Owners", subtitle="asdf", caption="asdf", x = "", y = "") + 
+  coord_equal()
+```
+
+
+
+
+
+
+

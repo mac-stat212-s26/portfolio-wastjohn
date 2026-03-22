@@ -1,5 +1,145 @@
 ---
-title: "Extra Sample 2"
+title: "Exam 2: Review of Adv. Data Wrangling I and II, Missing Data, Functions, and Base R"
+author: "Will St. John"
+date: "March 23, 2026"
+code-fold: False
 ---
 
-Add content here
+# Advanced Data Wrangling
+Data is most easy to work with when it's in a tabular or "tidy" form. However, raw data is almost never tidy and therefore requires some wrangling. In the `tidyverse` library, there are a few common verbs and data types that are useful in cleaning up the data. Below is a a brief summary of the two ideas in data wrangling, but the most useful things will likely be the cheat sheets, depending on what you're working with (ie. dates, strings, etc.)
+
+## Cheat Sheets
+
+- [data transformations](https://rstudio.github.io/cheatsheets/data-transformation.pdf)
+- [datetimes](https://rstudio.github.io/cheatsheets/lubridate.pdf)
+- [factors](https://rstudio.github.io/cheatsheets/factors.pdf)
+- [strings](https://rstudio.github.io/cheatsheets/strings.pdf)
+
+
+## Data Wrangling Verbs
+
+- `mutate()`: create/change columns in a data frame (df)
+- `select(): keep subsets of columns in a df
+- `filter()`: keep subsets of rows
+- `arrange()`: sort rows
+- `group_by()`: internally group rows
+- `summarize()`: collapse/combine information across rows using functions like (`n()`, `sum()`, `mean()`, `min()`, `max()`, `median()`, `sd()`)
+- `count()`: shortcut for `group_by() %>% summarize(n = n())`
+- `left_join()`: mutating join of two dfs, keeping all rows in the left
+- `full_join()`: mutating join of two dfs, keeping all rows in both
+- `inner_join()`: mutating join of two dfs, keeping rows in left that find match in right
+- `semi_join()`: filtering join of two dfs, keeping rows in left that find match in right
+- `anti_join()`: filtering join of two dfs, keeping rows in left that do not find match in right
+- `pivot_wider()`: rearrange values from two columns to many (one column becomes the names of new variables, one column becomes the values of the new variables)
+- `pivot_longer()`: rearrange values from many columns to two (the names of the columns go to one new variable, the values of the columns go to a second new variable)
+
+## Data Types
+
+- **Vectors**: vectors are lists where all the elements are the same type. There are different types of vectors, including logical, integer, numeric, character, date, and factor.
+- **Logicals**: a true or false value
+- **Numerics**: integer or floating point (doubles)
+- **Dates**: from the lubridate package, dates and times
+- **Factors**: an object with two components: values and levels, the latter of which give an order to the values.
+- **Strings**: sequences of characters; you can also use regular expressions to identify specific characters for wrangling (see the regex section in the string cheat sheet)
+
+The primary way you will handle data wrangling is on a case-by-case basis. Questions like "How can I remove all the spacing in this data set?" will be common. As such, the cheat sheets listed above will be the most useful in terms of providing functions to meet your specific needs.
+
+# Missing Data
+Some common practices for wrangling data are below
+
+1. **Leave the raw data untouched.** Make a copy of it to manipulate.
+2. **Check wrangled results often**. Make sure the changes are in line with what you intend
+3. **Ensure all dates are parsed the same way**. Make sure all dates follow a consistent order and format.
+4. **Check regex results often**. Regex is like another language. Make sure you're saying the right things.
+5. **Check for missing values**.
+
+
+One of the best ways to tell if you are missing data is to make visualizations with the data.
+
+There are two types of missing data: explicit (e.g., labeled `NA`) and implicit (e.g., a temporal data set that doesn't include the month of March).
+
+The steps to handle missing data are as follows:
+
+1. Convert all implicit missing values to explicit values.
+2. Decide what to do with the missing values. You could
+  a. drop all missing values,
+  b. create a category for missing values, or
+  c. impute (fill in) the missing values
+  
+What you decide on doing with your missing values should be informed by the mechanism by which the data became missing.
+
+## Missing Data Mechanisms
+
+- **Missing completely at random (MCAR)**: the missing data is affecting all cases (e.g., measurement device runs out of battery)
+- **Missing at random (MAR)**: you are more likely to be missing data related to observed variables (e.g., BP measurement tend to be missing from patients with worse health)
+- **Missing not at random (MNAR)**: you are more likely to be missing data related to unobserved variables (e.g., BP measurements are more likely to be missing from those with the highest BP)
+
+Many data sets have multiple mechanisms for missing data.
+
+> The most helpful thing you can do to identify the mechanisms for missing data is to *visualize the data*.
+
+# Functions
+
+Functions are useful for three reasons:
+
+1. Reduce errors: copy and paste can lead to errors
+2. Efficiency: updating the function updates every place it is called
+3. Readability: a function can be given a descriptive name to make the code more readable
+
+Parts of a function in `R` include:
+
+- `function()` directive: this tells `R` to make a function
+- function arguments: what inputs you want to give your function
+- function body: what manipulation you do with your inputs
+- return value: what object you want to get from your inputs
+
+In `R`, if you use a `tidyverse` verb in the function, you need to **embrace it**. In other words,
+
+```{r}
+group_means <- function(df, group_var, mean_var) {
+    df |>
+        group_by(group_var) |>
+        summarize(mean = mean(mean_var))
+}
+```
+
+won't work, but
+
+```{r}
+group_means <- function(df, group_var, mean_var) {
+    df |>
+        group_by({{ group_var }}) |>
+        summarize(mean = mean({{ mean_var }}))
+}
+```
+
+will work.
+
+# Base R
+
+Base `R` has the following objects:
+
+- list: a collection of elements
+- vector: a list where all elements are the same type
+- array: a vector with a dimensional attribute
+- matrix: an array with only 2 dimensions
+- data frame/tibble: a named list with elements of equal length
+
+You can access subsets of the objects and maintain the class structure with `[v]`, where `v` is one of the vectors below.
+
+- `v = positive integers`: select elements at those positions
+- `v = negative integers`: remove elements at those positions and give us the resulting object
+- `v = logical vector`: select elements that satisfy the logical statement
+- `v = character integers`: selected named elements based on the character values
+
+You can also subset a matrix or dataframe with the following syntax
+
+- `matrix[rows, columns]`
+
+For example, `m[4,]` would select the fourth row in the matrix `m`, while `m[1:9, 6:20]` select rows 1 through 9 in columns 6 through 20, and `m[1,1]` selects the entry in the first row and column.
+
+Additionally, you can use `$` to access a column in a named data frame (e.g., `df$col) but this breaks the original class structure (so you no longer have a data frame object, in this case.)
+
+
+
+
