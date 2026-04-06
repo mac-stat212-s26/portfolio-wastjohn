@@ -17,5 +17,3 @@ AutoAppendNewline: Yes
 StripTrailingWhitespace: Yes
 
 UseNativePipeOperator: Yes
-
-QuitChildProcessesOnExit: Yes

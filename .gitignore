@@ -70,3 +70,6 @@ _freeze/
 *.log
 *.aux
 *.toc
+
+# API keys
+/ica/census_api_key.txt

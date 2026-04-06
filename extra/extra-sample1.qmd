@@ -1,5 +1,278 @@
 ---
-title: "Extra Sample 1"
+title: "Exam 1: Review of Adv Data & Spatial Vis"
+author: "Will St. John"
+date: "February 23, 2026"
+code-fold: False
 ---
 
-Add content here
+# Advanced Data Vis
+`ggplot2` is designed to help us make efficient and effective plots by utilizing a standard convention of plot-making called the **grammar of graphics**. What follows is an overview of the standard terminology and examples.
+
+
+## Data
+Part of creating a standard convention for plots is having a standard convection for data. This `tidy` data mimics that of a spreadsheet or matrix, wherein rows correspond to **observations** and columns correspond to **variables**, and the intersection of a row and a column is a **value** (i.e., it's tabular). R calls these data frames `tibble`s.
+
+To start a data-exploration project in R, you really only need 2 things to start.
+
+```{r, eval=F}
+library(tidyverse)
+data <- read.csv("path/to/data.csv")
+```
+
+You can explore your data with the following commands. Note the `%>%` symbol corresponds to the pipe operator in `tidyverse`, which allows you to pass the object before the pipe into the function after the pipe.
+
+```{r, eval=F}
+data %>% head()  # see the first few rows
+
+data %>% tail()  # see the last few rows
+
+data %>% nrow()  # get the number of rows
+
+data %>% ncol()  # get the number of columns
+
+data %>% dim()  # get the dimensions of the data frame (rows x columns)
+
+data %>% View()  # open the dataset in your editor (RStudio, Positron, or VSCode)
+```
+
+You can also manipulate (under good intentions) the data by filtering, selecting, mutating, grouping, or summarizing. Thankfully, `tidyverse` has some aptly named functions for just that.
+
+```{r, eval=F}
+data %>%
+  filter(variable > value & ... | ...)
+  
+data %>%
+  select(variable1, variable2, ...)
+  
+data %>%
+  mutate(newvariable1 = ___, newvariable2 = ___, ...)
+  
+data %>%
+  group_by(variable1, variable2, ...) %>%
+  summarize(summaryvariable = ___, ...)
+```
+
+
+
+## `ggplot`
+After loading your data, the next step is to prep your canvas for plotting. This is done with 
+
+```{r, eval=F}
+data %>%
+  ggplot()
+```
+
+Inside the parentheses, we can pass our aesthetic mapping, `aes()`, which is how we can map various aesthetics (like `x`, `y`, `color`, `fill`, `shape`, `size`, etc) to the variables in our data. 
+
+```{r, eval=F}
+data %>%
+  ggplot(aes(x = ___, y = ___, color = ___, ...))
+```
+
+Note that when you do this, the mappings are passed to every layer you make afterwards, which is not *always* what you have in mind.
+
+
+## `geom_*`
+Speaking of layers, there are NUMEROUS geom layers you can add to your plots. Below is a list of *some* of the most common.
+
+```{r, eval=F}
+data %>%
+  ggplot(aes(x = ___, y = ___, color = ___, ...)) + 
+  geom_point() +   # makes a scatter plot
+  geom_smooth()  # adds a trendline to the data with uncertainty
+
+  
+data %>%
+  ggplot(aes(x = ___, color = ___, ...)) + 
+  geom_boxplot()  # makes a boxplot
+  
+data %>%
+  ggplot(aes(x = ___, color = ___, ...)) + 
+  geom_density()  # makes a density plot
+  
+data %>%
+  ggplot(aes(x = ___, color = ___, ...)) + 
+  geom_histogram() # makes a histogram 
+  
+...
+```
+
+As mentioned before, the main thing you need to remember is that the mappings will be taken from the `aes()` arguments in the `ggplot()` call unless directly passed into the `geom_*` function. In otherwords,
+
+```{r, eval=F}
+data %>%
+  ggplot(aes(x = x1, y = x2, color = ___, ...)) + 
+  geom_point() +   # makes a scatter plot of x2 vs x1
+  geom_point()  # makes a scatter plot of x2 vs x1
+  
+data %>%
+  ggplot() + 
+  geom_point(aes(x = x1, y = x2, color = ___, ...) +   # makes a scatter plot of x2 vs x1
+  geom_point(aes(x = x1, y = x3, color = ___, ...)  # makes a scatter plot of x3 vs x1
+
+```
+
+Key takeaway is that *sometimes* it's better to pass the mappings at the `geom_*` layer versus the `ggplot()` layer.
+
+## scaling
+Often times, you'll want to zoom in on a specific region of the plot, or make a log-log plot. This can be done easily with
+
+```{r, eval=F}
+data %>%
+  ggplot(aes(x = x1, y = x2, color = ___, ...)) + 
+  geom_point() + 
+  scale_x_continuous(limits = c(xlow, xhigh))
+  
+data %>%
+  ggplot(aes(x = x1, y = x2, color = ___, ...)) + 
+  geom_point() + 
+  scale_x_log10()
+```
+
+## `labs()`
+You can add to your plot by giving it a title, subtitle, caption, and x and y labels. All of this can be done inside the `labs()` function.
+
+```{r, eval=F}
+data %>%
+  ggplot(aes(x = x1, y = x2, color = ___, ...)) + 
+  geom_point() +
+  labs(
+    title = "___",
+    subtitle = "___",
+    caption = "___",
+    x = "___",
+    y = "___"
+  )
+```
+
+## `theme()`
+The real advanced part of data visualization comes with the theme, which allows you to change the style of various elements of your plot. There is a lot in this function, but the main takeaways are
+
+1. preface the `theme()` call with another theme to minimize your work. `theme_classic()` removes the background from the plot and is, as the name suggests, a classic theme used in advanced visualizations.
+2. All of the arguments you can call in `theme()` are listed hierarchically. In other words, the x-axis title can be found by editing the argument `axis.title.x`.
+
+```{r, eval=F}
+data %>%
+  ggplot(aes(x = x1, y = x2, color = ___, ...)) + 
+  geom_point() +
+  labs(
+    title = "___",
+    subtitle = "___",
+    caption = "___",
+    x = "___",
+    y = "___"
+  ) + 
+  theme_classic() + 
+  theme()
+```
+
+
+## Saving a plot
+Once your ready to show your plot, it's done in one move.
+
+```{r, eval=F}
+ggsave("name-of-plot.png")  # saves the most recent plot
+```
+
+## Final Tips
+As you continue to explore and create visualizations, remember 
+
+1. documentation is our friend, and
+2. you can always look up the function with a preceding `?` in the console.
+
+
+
+# Advanced Spatial Vis
+Now we will cover how we can make maps and other spatial visualizations with R.
+
+## What is a CRS and why do we care?
+We know the Earth is a sphere. Except that it's not... it's an oblate spheroid, or ellipsoid. Except that it's not... it's a bit more of a lumpy potato...
+
+Okay, so we can't accurately describe the shape of the Earth as one simple shape. How can we make spatial plots then?
+
+The answer is we approximate the Earth to be an ellipsoid, then choose our best part of the approximation, called the **datum**, to line up with our region of interest. This location-dependent approximation is more generally called a **coordinate references system**, or CRS for short.
+
+For example, NAD83 is the name of a CRS that has a datum centered on North America. SIRGAS20000 is the name of a CRS that has a datum centered on South America.
+
+But why would we care if we're using the NAD83 vs the SIRGAS20000 datum?
+
+In reality, it's only an issue when you are combining data from multiple spatial data sets. Unfortunately, combining data from multiple spatial data sets happens all the time!
+
+When we make our spatial plots, we make map projections. If the map projections are centered on different regions, we get distortions that can cause our overlaying of data to be inconsistent when in reality, they are the same! In other words, the coordinates of the Empire State Building in a NYC centered datum vs a Sydney, Australia centered datum could cause what should be two identical points to be off by a large distance. If we can't trust our data, then we can't share it with the world.
+
+
+
+
+## What types of spatial file/data types exist in R
+There are two main data types for spatial data in R:
+
+1. Vector
+  - **Points**: locations defined by (x, y) coordinates
+    - e.g. cities
+  - **Lines**: a set of ordered points connected by straight lines
+    - e.g. roads, rivers
+  - **Polygons**: same as lines, but first and last points are the same
+    - e.g. geopolitical boundaries, bodies of water
+  - File formats: text files (e.g. `.csv`, NOTE: don't store CRS), Shapefiles (`.shp`), GeoJSON (`.geojson`), KML (`.kml`)
+  
+2. Raster: like pixel grids
+  - Continuous grid of (generally) square cells where each cell has a single value. Cells could be regular, rotated, sheared, rectilinear, or curvilinear. Can also have a resolution elements (i.e. fine vs coarse raster) which are directly related to computation time.
+  - File formats: GeoTIFF (`.tif` or `.tiff`), NetCDF (`.nc`), HDF (`.hdf`)
+  
+
+
+## How can we use R to plot spatial data?
+We can treat spatial data like every other type of data. All we need is the `tidyverse` and `sf` library.
+
+```{r, eval=F}
+library(tidyverse)
+library(sf)
+```
+
+From there, simply read in the spatial data into a tidy format.
+
+```{r, eval=F}
+data.spatial1 <- st_read('location/of/spatial/file1.shp')
+data.spatial2 <- st_read('location/of/spatial/file2.shp')
+...
+```
+
+The key thing to remember is that **WE MUST PLOT THESE WITH THE SAME CRS FOR OUR RESULTS TO BE ACCURATE**.
+
+You can check the CRS with
+
+```{r, eval=F}
+st_crs(data.spatial1)
+```
+
+and you can transform one CRS to another using 
+
+```{r, eval=F}
+data.spatial2 <- data.spatial2 %>% st_transform(crs = st_crs(data.spatial1))
+```
+
+From there, we can plot just like any other `geom_*` object! We just need to specify with the `geom_sf` layer.
+
+```{r, eval=F}
+ggplot() + 
+  geom_sf(
+    data = data.spatial1,  # ex: spatial map of counties
+    mapping = aes(fill = population)
+  )  # plot counties filled by population
+  geom_sf(
+    data = data.spatial2,  # ex: spatial map of cites
+    mapping = aes(x = x, y = y)
+  )  # plot cities in the counties
+```
+
+From there, you can zoom, edit themes, and do everything else you normally can do with a `ggplot` object!
+
+
+
+
+
+
+
+
+
+

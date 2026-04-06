@@ -1,0 +1,49 @@
+---
+title: "2026-02-03: Edible Plants Database"
+format: html
+---
+
+
+# Dataset
+> **Taken from [tidytuesday](https://github.com/rfordatascience/tidytuesday/blob/main/data/2026/2026-01-27/readme.md)**: This week we’re exploring Brazilian Companies, curated from Brazil’s open CNPJ (Cadastro Nacional da Pessoa Jurídica) records published by the Brazilian Ministry of Finance / Receita Federal on the national open-data portal (dados.gov.br).
+>
+> The CNPJ open data is a large-scale public registry of Brazilian legal entities. For this dataset, the raw company records were cleaned and enriched with lookup tables (legal nature, owner qualification, and company size), then filtered to retain firms above a share-capital threshold so the analysis focuses on meaningful variation in capital stock.
+
+
+
+## Research Question
+
+Possible questions: What do I need to set my thermostat to in my greenhouse for each plant? And for how long? is the relationship between temperature and life-cycle of an edible plant?
+
+> **Research question here**
+
+## Analysis
+
+```{r}
+library(tidyverse)
+edible_plants <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2026/2026-02-03/edible_plants.csv')
+```
+ 
+
+
+
+```{r}
+edible_plants
+```
+
+```{r}
+edible_plants %>%
+  filter(!is.na(temperature_germination) & !is.na(days_germination)) %>%
+  mutate(temperature_germination = as.numeric(temperature_germination)) %>%
+  ggplot() + 
+  geom_segment(
+    aes(
+      y = as.numeric(temperature_germination),
+      x = 0,
+      xend = as.numeric(days_germination)
+    )
+  )
+  
+```
+
+

@@ -1,0 +1,95 @@
+---
+title: "13 APIs I"
+logo: "../images/mac.png"
+---
+
+
+## JSON files
+
+JSON (JavaScript Object Notation) is a lightweight, human-readable data-interchange format.
+
+- It is easy for humans to read and write.
+- It is easy for machines to parse and generate.
+- It is commonly used for APIs (Application Program Interface) to share data.
+
+
+Here is an example of the most basic format of JSON:
+
+```json
+{
+  "name": "John",
+  "age": 30,
+  "city": "New York",
+  "hobbies": ["reading", "hiking", "coding"]
+}
+```
+
+
+JSON Syntax:
+
+- Curly braces `{}` enclose an object, which is a collection of key-value pairs.
+- Key-value pairs--each pair consists of a key (string) and a value (can be string, number, boolean, array, or another object).
+- Colon `:` separates the key from the value.
+- Comma `,` separates different key-value pairs within the object.
+- Square brackets `[]` enclose an array, which is an ordered list of values.
+- Double quotes used to surround the key and any string value
+
+
+## Reading JSON Files
+
+There are a few packages we could use to read JSON files into R.
+
+We will start by using the `jsonlite` package today.
+
+```{r echo=TRUE}
+# install.packages('jsonlite')
+library(jsonlite)
+
+# R originally treats JSON as a string of characters
+json <- '{"name": "John", "age": 30, "city": "New York", "hobbies": ["reading", "hiking", "coding"]}'
+```
+
+
+
+```{r echo=TRUE}
+#fromJSON() converts JSON characters to R objects
+data_in_r <- fromJSON(json)
+
+data_in_r
+```
+
+What type of object is this?
+
+
+A named list (but elements are not all of the same length).
+
+```{r echo=TRUE}
+data_in_r |> class()
+```
+
+
+If we have an array of objects, we can imagine each element of the array is one row of a dataset.
+
+```{r echo=TRUE}
+json <-
+'[
+  {"Name" : "Mario", "Age" : 32, "Occupation" : "Plumber"}, 
+  {"Name" : "Peach", "Age" : 21, "Occupation" : "Princess"},
+  {},
+  {"Name" : "Bowser", "Occupation" : "Koopa"}
+]'
+```
+
+
+```{r echo=TRUE}
+# If we don't try to simplify, fromJSON() provides a list
+fromJSON(json, simplifyVector = FALSE) 
+```
+
+
+```{r echo=TRUE}
+# If it is an array that satisfies the constraints of a data frame, it may be able to simplify to data frame
+fromJSON(json, simplifyVector = TRUE)
+```
+
+For more info about converting JSON data to R objects with jsonlite, see <https://cran.r-project.org/web/packages/jsonlite/vignettes/json-mapping.pdf>
